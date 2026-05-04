@@ -1,6 +1,6 @@
-# 🌍 Carbon Platform — Full Stack Project
+# 🌍 Carbon Credit Platform — BlockChain based platform
 
-A blockchain based full-stack web platform for carbon credit project management, auditing, and marketplace trading.
+A blockchain based platform for carbon credit project management, auditing, and marketplace trading.
 
 ---
 
