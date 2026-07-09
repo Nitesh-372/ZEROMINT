@@ -2,13 +2,14 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 import "./CarbonCreditToken.sol";
 
 /**
  * @title CarbonMarketplace
  * @dev Simple marketplace to list and buy carbon credits (ERC1155 tokens) for ETH.
  */
-contract CarbonMarketplace is ReentrancyGuard {
+contract CarbonMarketplace is ReentrancyGuard, ERC1155Holder {
     struct Listing {
         uint256 id;
         address seller;
@@ -147,3 +148,4 @@ contract CarbonMarketplace is ReentrancyGuard {
         feeBps = _feeBps;
     }
 }
+

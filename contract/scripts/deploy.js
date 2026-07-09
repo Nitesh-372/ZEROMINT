@@ -42,6 +42,19 @@ async function main() {
   console.log("CARBON_TOKEN_ADDRESS =", carbonToken.address);
   console.log("REGISTRY_ADDRESS     =", registry.address);
   console.log("MARKETPLACE_ADDRESS  =", marketplace.address);
+
+  // Auto-update Backend .env file
+  const fs = require("fs");
+  const path = require("path");
+  const envPath = path.join(__dirname, "../../Backend/.env");
+  if (fs.existsSync(envPath)) {
+    let envContent = fs.readFileSync(envPath, "utf8");
+    envContent = envContent.replace(/CARBON_TOKEN_ADDRESS\s*=\s*.*/g, `CARBON_TOKEN_ADDRESS=${carbonToken.address}`);
+    envContent = envContent.replace(/REGISTRY_CONTRACT_ADDRESS\s*=\s*.*/g, `REGISTRY_CONTRACT_ADDRESS=${registry.address}`);
+    envContent = envContent.replace(/MARKETPLACE_CONTRACT_ADDRESS\s*=\s*.*/g, `MARKETPLACE_CONTRACT_ADDRESS=${marketplace.address}`);
+    fs.writeFileSync(envPath, envContent);
+    console.log("✅ Auto-updated Backend/.env with new contract addresses");
+  }
 }
 
 main()

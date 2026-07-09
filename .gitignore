@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+
+# env / secrets
+.env
+.env.*
+!.env.example
+
+# frontend build/cache
+frontend/dist/
+frontend/.vite/
+frontend/vite-dev.log
+frontend/vite-dev.err
+frontend/node_modules/.vite/
+
+# hardhat build/cache
+contract/artifacts/
+contract/cache/
+
+# temporary imports
+.stitch_extract/
+
+# editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# local runtime logs
+*.log
+*.err
