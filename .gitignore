@@ -28,3 +28,10 @@ Thumbs.db
 # local runtime logs
 *.log
 *.err
+# dependencies (ignores node_modules in ANY folder)
+**/node_modules/
+
+# env / secrets (ignores .env files in ANY folder)
+**/.env
+**/.env.*
+!.env.example
