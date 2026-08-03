@@ -10,7 +10,20 @@ const projectSchema = new mongoose.Schema({
   location: { type: String, default: '' },
   description: { type: String, default: '' },
   methodology: { type: String, default: '' },
-  files: [{ filename: String, path: String, hash: String, kind: String }],
+  files: [{
+    filename: String,
+    originalName: String,
+    path: String,
+    hash: String,
+    kind: String,
+    mimeType: String,
+    size: Number,
+  }],
+  evidenceSummary: {
+    fileCount: { type: Number, default: 0 },
+    totalBytes: { type: Number, default: 0 },
+    evidenceHash: { type: String, default: '' },
+  },
   assignedAuditor: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   assignedAuditorWallet: { type: String, default: '' },
   status: {

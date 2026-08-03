@@ -12,6 +12,7 @@ const marketplaceRoutes = require('./routes/marketplaceRoutes');
 const app = express();
 app.use(cors({ origin: true, credentials: true })); // Allow all origins for hackathon
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('src/uploads'));
 
 app.get('/api/health', (req, res) => {

@@ -4,12 +4,14 @@ const { v4: uuidv4 } = require('uuid');
 const blockchainService = require('../services/blockchainService');
 
 function canAudit(user, project) {
-  return user.role === 'admin' || String(project.assignedAuditor || '') === String(user._id);
+  return user.role === 'admin' || user.role === 'auditor' || String(project.assignedAuditor || '') === String(user._id);
 }
 
 exports.getAssigned = async (req, res) => {
   try {
-    const filter = req.user.role === 'admin' ? {} : { assignedAuditor: req.user._id };
+    const filter = (req.user.role === 'admin' || req.user.role === 'auditor')
+      ? {}
+      : { assignedAuditor: req.user._id };
     const projects = await Project.find(filter).populate('owner', 'name email walletAddress').populate('assignedAuditor', 'name email walletAddress');
     return res.json({ projects });
   } catch (err) {
@@ -24,14 +26,24 @@ exports.approveProject = async (req, res) => {
     const project = await Project.findOne({ projectId });
     if (!project) return res.status(404).json({ msg: 'Not found' });
     if (!canAudit(req.user, project)) return res.status(403).json({ msg: 'Not assigned' });
-    if (!project.onChainProjectId) return res.status(400).json({ msg: 'Project is missing onChainProjectId' });
 
     const amount = approvedCredits || project.creditsRequested;
-    let tokenResult;
+    let tokenResult = {
+      tokenId: String(project.onChainProjectId || project.evidenceSummary?.evidenceHash || project.projectId),
+      chainHash: '',
+      offline: true,
+    };
     try {
+      if (!project.onChainProjectId) {
+        const err = new Error('Project is not registered on-chain yet');
+        err.code = 'BLOCKCHAIN_NOT_CONFIGURED';
+        throw err;
+      }
       tokenResult = await blockchainService.verifyAndMint({ onChainProjectId: project.onChainProjectId, approvedCredits: amount });
     } catch (err) {
-      return res.status(502).json({ msg: 'Blockchain mint failed', err: err.message });
+      if (err.code !== 'BLOCKCHAIN_NOT_CONFIGURED') {
+        return res.status(502).json({ msg: 'Blockchain mint failed', err: err.message });
+      }
     }
 
     const credit = await Credit.create({
@@ -49,10 +61,18 @@ exports.approveProject = async (req, res) => {
     project.status = 'Minted';
     project.creditsApproved = amount;
     project.approvalHash = tokenResult.chainHash || '';
-    project.lastComment = `${amount} credits approved and minted.`;
+    project.lastComment = tokenResult.offline
+      ? `${amount} credits approved and added to wallet in demo mode.`
+      : `${amount} credits approved and minted.`;
     await project.save();
 
-    return res.json({ msg: 'Project approved and credits issued', credit, project });
+    return res.json({
+      msg: tokenResult.offline
+        ? 'Project approved and demo credits issued'
+        : 'Project approved and credits issued',
+      credit,
+      project,
+    });
   } catch (err) {
     return res.status(500).json({ msg: 'Server error', err: err.message });
   }
